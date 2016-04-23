@@ -519,6 +519,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 Bundle args = new Bundle();
                 args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS,
                         selectedCategoryIds);
+                args.putBoolean(CategoriesPickerFragment.READ_ONLY, true);
                 fragment.setArguments(args);
 
                 fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());

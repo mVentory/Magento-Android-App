@@ -15415,106 +15415,106 @@ com.mageventory.activity.AbsProductActivity -> com.mageventory.activity.AbsProdu
     java.util.Map mValidationFailedAttributes -> aq
     132:371:void <init>() -> <init>
     377:484:void absOnCreate() -> g
-    490:527:void initializeSelectCategoriesButton() -> h
-    534:534:void onPriceEditDone() -> i
-    538:541:void onDestroy() -> onDestroy
-    545:574:boolean executeMenuAction(com.mageventory.util.DefaultOptionsMenuHelper$MenuAction) -> a
-    580:581:void onResume() -> onResume
-    585:586:void onPause() -> onPause
-    590:618:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    624:634:void checkCodeExists(java.lang.String,boolean) -> c
+    490:528:void initializeSelectCategoriesButton() -> h
+    535:535:void onPriceEditDone() -> i
+    539:542:void onDestroy() -> onDestroy
+    546:575:boolean executeMenuAction(com.mageventory.util.DefaultOptionsMenuHelper$MenuAction) -> a
+    581:582:void onResume() -> onResume
+    586:587:void onPause() -> onPause
+    591:619:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    625:635:void checkCodeExists(java.lang.String,boolean) -> c
     void showInvalidLabelDialog(java.lang.String,java.lang.String) -> a
-    643:699:boolean skuScanCommon(android.content.Intent,int) -> a
-    723:761:boolean codeScanCommon(java.lang.String,com.mageventory.util.ScanUtils$ScanResult,int,boolean,boolean) -> a
-    791:805:boolean showMissingMetadataDialogIfNecessary(com.mageventory.util.ScanUtils$ScanResult,java.lang.Runnable,java.lang.Runnable,android.app.Activity,com.mageventory.settings.Settings) -> a
-    820:859:void showMissingMetadataDialog(java.lang.Runnable,java.lang.Runnable,android.app.Activity,com.mageventory.settings.Settings) -> a
-    871:872:void setSpecialAttributeValueIfNotNullIgnoreChanges(java.lang.String,java.lang.String) -> b
-    888:895:void setSpecialAttributeValueIfNotNullIgnoreChanges(java.lang.String,java.lang.String,boolean) -> a
-    910:912:void onCodeChanged(java.lang.String,java.lang.String) -> c
-    915:915:void onKnownSkuCheckCompletedNotFound() -> j
-    918:918:void onKnownBarcodeCheckCompletedNotFound() -> k
-    925:925:void onAttributeUpdatedViaScan() -> l
-    928:928:void onGestureInputSuccess() -> m
-    939:945:java.lang.String getProductName(com.mageventory.activity.AbsProductActivity) -> a
-    957:965:void determineWhetherNameIsGeneratedAndSetProductName(java.lang.String) -> a
-    968:977:void showAttributeSetListOrSelectDefault() -> n
-    987:994:boolean checkAttributeSetListCanBeShown() -> o
-    998:1038:void showAttributeSetList() -> p
-    1042:1042:void onAttributeSetItemClicked() -> q
-    1049:1049:void onAttributeSetDialogCancelled() -> r
-    1053:1095:void selectAttributeSet(int,boolean,boolean) -> a
-    1101:1114:java.util.List getAttributeList() -> s
-    1124:1134:java.util.List getAttributeSets() -> t
-    1143:1143:java.util.List getCategories() -> u
-    1152:1158:void loadCategories(boolean) -> b
-    1163:1172:void loadAttributesSet(boolean) -> c
-    1175:1187:void loadAttributeList(boolean) -> d
-    1190:1192:void removeAttributeListV() -> v
-    1195:1209:void showAttributeListV(boolean) -> f
-    1215:1218:void removeSpecialAttributeViews() -> w
-    1226:1274:void initSpecialAttributes() -> x
-    1290:1292:void setSpecialAttributeValueFromProductIgnoreChanges(java.lang.String,com.mageventory.model.Product,boolean) -> a
-    1316:1321:void performClickOnSpecialAttribute(java.lang.String) -> b
-    1331:1332:android.widget.EditText getSpecialAttributeEditTextView(java.lang.String) -> c
-    1343:1349:java.lang.String getSpecialAttributeValue(java.lang.String) -> d
-    1359:1360:void setSpecialAttributeValueIfNotNull(java.lang.String,java.lang.String) -> d
-    1372:1373:void setSpecialAttributeValueIfNotNull(java.lang.String,java.lang.String,boolean) -> b
-    1387:1393:void setSpecialAttributeValueIfNotNull(java.lang.String,java.lang.String,boolean,boolean) -> a
-    1402:1402:boolean isSpecialAttributeAvailable(java.lang.String) -> e
-    1414:1415:boolean isSpecialAttributeAvailableAndEditable(java.lang.String) -> f
-    1427:1429:com.mageventory.model.CustomAttribute getSpecialAttribute(java.lang.String) -> g
-    1437:1444:void updateInputCacheWithCurrentValues() -> y
-    1452:1467:void updateInputCacheWithCurrentValues(java.util.Collection) -> a
-    1473:1484:void onInputCacheLoaded(java.util.Map) -> a
-    1490:1491:void onCategoriesLoadStart() -> z
-    1497:1499:void onCategoriesLoadFailure() -> A
-    1506:1508:void onCategoriesLoadSuccess() -> B
-    1511:1515:void onAttributeSetLoadStart() -> C
-    1518:1522:void onAttributeSetLoadFailure() -> D
-    1525:1540:void onAttributeSetLoadSuccess() -> E
-    1543:1559:void onAttributeListLoadSuccess() -> F
-    1562:1565:void onAttributeListLoadFailure() -> G
-    1569:1573:void onAttributeListLoadStart() -> H
-    1585:1717:java.util.Set selectAttributeValuesFromProductName() -> I
-    1728:1743:boolean selectAttributeSetFromPredefinedAttributeValues() -> J
-    1755:1847:java.util.Set assignPredefinedAttributeValues() -> K
-    1866:1885:boolean assignPredefinedAttributeValues(java.util.Set,com.mageventory.model.CustomAttributeSimple,java.util.Collection) -> a
-    1896:1902:boolean scanSku(android.view.View) -> a
-    1912:1918:boolean scanBarcode(android.view.View) -> b
-    1924:1925:void attachListenerToEditText(android.widget.EditText,android.view.View$OnClickListener) -> a
-    1929:1960:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
-    1964:1965:void onBackPressed() -> onBackPressed
-    1968:1969:void onConfirmedExit() -> L
-    1972:1991:void confirmExit() -> M
-    1994:1995:void showKnownSkuDialog(java.lang.String) -> h
-    1998:1999:void showKnownBarcodeDialog(java.lang.String) -> i
-    2003:2052:void showKnownSkuOrBarcodeDialog(java.lang.String,boolean) -> a
-    2055:2055:boolean isCurrentCode(java.lang.String,boolean) -> b
-    2060:2066:void launchProductDetails(java.lang.String) -> k
-    2078:2117:boolean checkBookCodeEntered(com.mageventory.model.CustomAttribute,java.lang.String) -> a
-    2132:2133:void loadBookInfo(java.lang.String,com.mageventory.model.CustomAttribute) -> a
-    2148:2170:void loadBookInfo(java.lang.String,com.mageventory.tasks.BookInfoLoader$BookCodeType,com.mageventory.model.CustomAttribute) -> a
-    2185:2189:void stopBookInfoLoadingIfSource(com.mageventory.model.CustomAttribute) -> a
-    2198:2198:boolean checkCodeValidationRunning() -> N
-    2217:2217:void initWebActivityIntent(android.content.Intent) -> a
-    2227:2227:boolean isEventTarget(android.content.Intent) -> b
+    644:700:boolean skuScanCommon(android.content.Intent,int) -> a
+    724:762:boolean codeScanCommon(java.lang.String,com.mageventory.util.ScanUtils$ScanResult,int,boolean,boolean) -> a
+    792:806:boolean showMissingMetadataDialogIfNecessary(com.mageventory.util.ScanUtils$ScanResult,java.lang.Runnable,java.lang.Runnable,android.app.Activity,com.mageventory.settings.Settings) -> a
+    821:860:void showMissingMetadataDialog(java.lang.Runnable,java.lang.Runnable,android.app.Activity,com.mageventory.settings.Settings) -> a
+    872:873:void setSpecialAttributeValueIfNotNullIgnoreChanges(java.lang.String,java.lang.String) -> b
+    889:896:void setSpecialAttributeValueIfNotNullIgnoreChanges(java.lang.String,java.lang.String,boolean) -> a
+    911:913:void onCodeChanged(java.lang.String,java.lang.String) -> c
+    916:916:void onKnownSkuCheckCompletedNotFound() -> j
+    919:919:void onKnownBarcodeCheckCompletedNotFound() -> k
+    926:926:void onAttributeUpdatedViaScan() -> l
+    929:929:void onGestureInputSuccess() -> m
+    940:946:java.lang.String getProductName(com.mageventory.activity.AbsProductActivity) -> a
+    958:966:void determineWhetherNameIsGeneratedAndSetProductName(java.lang.String) -> a
+    969:978:void showAttributeSetListOrSelectDefault() -> n
+    988:995:boolean checkAttributeSetListCanBeShown() -> o
+    999:1039:void showAttributeSetList() -> p
+    1043:1043:void onAttributeSetItemClicked() -> q
+    1050:1050:void onAttributeSetDialogCancelled() -> r
+    1054:1096:void selectAttributeSet(int,boolean,boolean) -> a
+    1102:1115:java.util.List getAttributeList() -> s
+    1125:1135:java.util.List getAttributeSets() -> t
+    1144:1144:java.util.List getCategories() -> u
+    1153:1159:void loadCategories(boolean) -> b
+    1164:1173:void loadAttributesSet(boolean) -> c
+    1176:1188:void loadAttributeList(boolean) -> d
+    1191:1193:void removeAttributeListV() -> v
+    1196:1210:void showAttributeListV(boolean) -> f
+    1216:1219:void removeSpecialAttributeViews() -> w
+    1227:1275:void initSpecialAttributes() -> x
+    1291:1293:void setSpecialAttributeValueFromProductIgnoreChanges(java.lang.String,com.mageventory.model.Product,boolean) -> a
+    1317:1322:void performClickOnSpecialAttribute(java.lang.String) -> b
+    1332:1333:android.widget.EditText getSpecialAttributeEditTextView(java.lang.String) -> c
+    1344:1350:java.lang.String getSpecialAttributeValue(java.lang.String) -> d
+    1360:1361:void setSpecialAttributeValueIfNotNull(java.lang.String,java.lang.String) -> d
+    1373:1374:void setSpecialAttributeValueIfNotNull(java.lang.String,java.lang.String,boolean) -> b
+    1388:1394:void setSpecialAttributeValueIfNotNull(java.lang.String,java.lang.String,boolean,boolean) -> a
+    1403:1403:boolean isSpecialAttributeAvailable(java.lang.String) -> e
+    1415:1416:boolean isSpecialAttributeAvailableAndEditable(java.lang.String) -> f
+    1428:1430:com.mageventory.model.CustomAttribute getSpecialAttribute(java.lang.String) -> g
+    1438:1445:void updateInputCacheWithCurrentValues() -> y
+    1453:1468:void updateInputCacheWithCurrentValues(java.util.Collection) -> a
+    1474:1485:void onInputCacheLoaded(java.util.Map) -> a
+    1491:1492:void onCategoriesLoadStart() -> z
+    1498:1500:void onCategoriesLoadFailure() -> A
+    1507:1509:void onCategoriesLoadSuccess() -> B
+    1512:1516:void onAttributeSetLoadStart() -> C
+    1519:1523:void onAttributeSetLoadFailure() -> D
+    1526:1541:void onAttributeSetLoadSuccess() -> E
+    1544:1560:void onAttributeListLoadSuccess() -> F
+    1563:1566:void onAttributeListLoadFailure() -> G
+    1570:1574:void onAttributeListLoadStart() -> H
+    1586:1718:java.util.Set selectAttributeValuesFromProductName() -> I
+    1729:1744:boolean selectAttributeSetFromPredefinedAttributeValues() -> J
+    1756:1848:java.util.Set assignPredefinedAttributeValues() -> K
+    1867:1886:boolean assignPredefinedAttributeValues(java.util.Set,com.mageventory.model.CustomAttributeSimple,java.util.Collection) -> a
+    1897:1903:boolean scanSku(android.view.View) -> a
+    1913:1919:boolean scanBarcode(android.view.View) -> b
+    1925:1926:void attachListenerToEditText(android.widget.EditText,android.view.View$OnClickListener) -> a
+    1930:1961:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
+    1965:1966:void onBackPressed() -> onBackPressed
+    1969:1970:void onConfirmedExit() -> L
+    1973:1992:void confirmExit() -> M
+    1995:1996:void showKnownSkuDialog(java.lang.String) -> h
+    1999:2000:void showKnownBarcodeDialog(java.lang.String) -> i
+    2004:2053:void showKnownSkuOrBarcodeDialog(java.lang.String,boolean) -> a
+    2056:2056:boolean isCurrentCode(java.lang.String,boolean) -> b
+    2061:2067:void launchProductDetails(java.lang.String) -> k
+    2079:2118:boolean checkBookCodeEntered(com.mageventory.model.CustomAttribute,java.lang.String) -> a
+    2133:2134:void loadBookInfo(java.lang.String,com.mageventory.model.CustomAttribute) -> a
+    2149:2171:void loadBookInfo(java.lang.String,com.mageventory.tasks.BookInfoLoader$BookCodeType,com.mageventory.model.CustomAttribute) -> a
+    2186:2190:void stopBookInfoLoadingIfSource(com.mageventory.model.CustomAttribute) -> a
+    2199:2199:boolean checkCodeValidationRunning() -> N
+    2218:2218:void initWebActivityIntent(android.content.Intent) -> a
+    2228:2228:boolean isEventTarget(android.content.Intent) -> b
     boolean isEventTarget(android.content.Intent,boolean) -> a
     java.lang.String getSku() -> O
     com.mageventory.model.Product getProduct() -> P
-    2261:2338:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-    2354:2368:boolean appendText(java.lang.String,java.lang.String,java.util.Collection) -> a
-    2385:2394:boolean setValueToAttributesOfContentType(java.lang.String,com.mageventory.model.CustomAttribute$ContentType,java.util.Collection) -> a
-    2406:2413:void appendText(android.widget.EditText,java.lang.String,boolean) -> a
-    2417:2418:void onEditDone(java.lang.String) -> j
-    2429:2459:void checkValidationFailedAttribute(java.lang.String) -> m
-    2469:2519:boolean verifyForm(boolean,boolean) -> a
-    2531:2553:void validateAttributes(java.util.Collection) -> b
-    2564:2573:boolean validateAttributeValue(com.mageventory.model.CustomAttribute,java.lang.String) -> b
-    2584:2596:java.lang.String getAttributeValue(com.mageventory.model.CustomAttribute) -> b
-    2603:2605:void searchInternet() -> Q
-    2610:2612:void onCategoriesSelected(java.util.Collection) -> c
-    2617:2617:void onCategoriesSelectionCancelled() -> R
-    518:525:void lambda$initializeSelectCategoriesButton$0(android.view.View) -> c
+    2262:2339:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
+    2355:2369:boolean appendText(java.lang.String,java.lang.String,java.util.Collection) -> a
+    2386:2395:boolean setValueToAttributesOfContentType(java.lang.String,com.mageventory.model.CustomAttribute$ContentType,java.util.Collection) -> a
+    2407:2414:void appendText(android.widget.EditText,java.lang.String,boolean) -> a
+    2418:2419:void onEditDone(java.lang.String) -> j
+    2430:2460:void checkValidationFailedAttribute(java.lang.String) -> m
+    2470:2520:boolean verifyForm(boolean,boolean) -> a
+    2532:2554:void validateAttributes(java.util.Collection) -> b
+    2565:2574:boolean validateAttributeValue(com.mageventory.model.CustomAttribute,java.lang.String) -> b
+    2585:2597:java.lang.String getAttributeValue(com.mageventory.model.CustomAttribute) -> b
+    2604:2606:void searchInternet() -> Q
+    2611:2613:void onCategoriesSelected(java.util.Collection) -> c
+    2618:2618:void onCategoriesSelectionCancelled() -> R
+    518:526:void lambda$initializeSelectCategoriesButton$0(android.view.View) -> c
     132:132:boolean access$001(com.mageventory.activity.AbsProductActivity,com.mageventory.util.DefaultOptionsMenuHelper$MenuAction) -> a
     132:132:void access$100(com.mageventory.activity.AbsProductActivity,java.lang.String,boolean) -> a
     132:132:android.app.Dialog access$200(com.mageventory.activity.AbsProductActivity) -> b
@@ -15540,48 +15540,48 @@ com.mageventory.activity.AbsProductActivity$1 -> com.mageventory.activity.b:
     415:419:void onPriceEditDone(java.lang.Double,java.lang.Double,java.util.Date,java.util.Date) -> a
 com.mageventory.activity.AbsProductActivity$10 -> com.mageventory.activity.c:
     java.lang.Runnable val$codeScannedRunnable -> a
-    851:851:void <init>(java.lang.Runnable) -> <init>
-    855:856:void onCancel(android.content.DialogInterface) -> onCancel
+    852:852:void <init>(java.lang.Runnable) -> <init>
+    856:857:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.activity.AbsProductActivity$11 -> com.mageventory.activity.d:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    1009:1009:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    1012:1028:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+    1010:1010:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    1013:1029:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
 com.mageventory.activity.AbsProductActivity$12 -> com.mageventory.activity.e:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    1029:1029:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    1034:1035:void onCancel(android.content.DialogInterface) -> onCancel
+    1030:1030:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    1035:1036:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.activity.AbsProductActivity$13 -> com.mageventory.activity.f:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    1976:1976:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    1979:1980:void onClick(android.content.DialogInterface,int) -> onClick
+    1977:1977:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    1980:1981:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$14 -> com.mageventory.activity.g:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    1983:1983:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    1987:1987:void onClick(android.content.DialogInterface,int) -> onClick
+    1984:1984:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    1988:1988:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$15 -> com.mageventory.activity.h:
     boolean val$isBarcode -> a
     java.lang.String val$code -> b
     com.mageventory.activity.AbsProductActivity this$0 -> c
-    2016:2016:void <init>(com.mageventory.activity.AbsProductActivity,boolean,java.lang.String) -> <init>
-    2019:2025:void onClick(android.content.DialogInterface,int) -> onClick
+    2017:2017:void <init>(com.mageventory.activity.AbsProductActivity,boolean,java.lang.String) -> <init>
+    2020:2026:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$16 -> com.mageventory.activity.i:
     boolean val$isBarcode -> a
     com.mageventory.activity.AbsProductActivity this$0 -> b
-    2028:2028:void <init>(com.mageventory.activity.AbsProductActivity,boolean) -> <init>
-    2031:2036:void onClick(android.content.DialogInterface,int) -> onClick
+    2029:2029:void <init>(com.mageventory.activity.AbsProductActivity,boolean) -> <init>
+    2032:2037:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$17 -> com.mageventory.activity.j:
     boolean val$isBarcode -> a
     com.mageventory.activity.AbsProductActivity this$0 -> b
-    2040:2040:void <init>(com.mageventory.activity.AbsProductActivity,boolean) -> <init>
-    2044:2049:void onDismiss(android.content.DialogInterface) -> onDismiss
+    2041:2041:void <init>(com.mageventory.activity.AbsProductActivity,boolean) -> <init>
+    2045:2050:void onDismiss(android.content.DialogInterface) -> onDismiss
 com.mageventory.activity.AbsProductActivity$18 -> com.mageventory.activity.k:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    2450:2450:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    2453:2454:void run() -> run
+    2451:2451:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    2454:2455:void run() -> run
 com.mageventory.activity.AbsProductActivity$19 -> com.mageventory.activity.l:
     int[] $SwitchMap$com$mageventory$util$EventBusUtils$EventType -> a
     int[] $SwitchMap$com$mageventory$model$CustomAttribute$InputMethod -> b
-    2261:3728:void <clinit>() -> <clinit>
+    2262:3729:void <clinit>() -> <clinit>
 com.mageventory.activity.AbsProductActivity$2 -> com.mageventory.activity.m:
     com.mageventory.activity.AbsProductActivity this$0 -> a
     468:468:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
@@ -15589,210 +15589,210 @@ com.mageventory.activity.AbsProductActivity$2 -> com.mageventory.activity.m:
 com.mageventory.activity.AbsProductActivity$3 -> com.mageventory.activity.n:
     com.mageventory.util.DefaultOptionsMenuHelper$MenuAction val$menuAction -> a
     com.mageventory.activity.AbsProductActivity this$0 -> b
-    556:556:void <init>(com.mageventory.activity.AbsProductActivity,com.mageventory.util.DefaultOptionsMenuHelper$MenuAction) -> <init>
-    559:560:void onClick(android.content.DialogInterface,int) -> onClick
+    557:557:void <init>(com.mageventory.activity.AbsProductActivity,com.mageventory.util.DefaultOptionsMenuHelper$MenuAction) -> <init>
+    560:561:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$4 -> com.mageventory.activity.o:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    563:563:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    567:567:void onClick(android.content.DialogInterface,int) -> onClick
+    564:564:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    568:568:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$5 -> com.mageventory.activity.p:
     com.mageventory.util.ScanUtils$ScanResult val$scanResult -> a
     java.lang.String val$attributeCode -> b
     boolean val$activateWeightField -> c
     boolean val$activatePriceField -> d
     com.mageventory.activity.AbsProductActivity this$0 -> e
-    723:723:void <init>(com.mageventory.activity.AbsProductActivity,com.mageventory.util.ScanUtils$ScanResult,java.lang.String,boolean,boolean) -> <init>
-    728:759:void run() -> run
+    724:724:void <init>(com.mageventory.activity.AbsProductActivity,com.mageventory.util.ScanUtils$ScanResult,java.lang.String,boolean,boolean) -> <init>
+    729:760:void run() -> run
 com.mageventory.activity.AbsProductActivity$6 -> com.mageventory.activity.q:
     int val$requestCode -> a
     com.mageventory.activity.AbsProductActivity this$0 -> b
-    762:762:void <init>(com.mageventory.activity.AbsProductActivity,int) -> <init>
-    766:768:void run() -> run
+    763:763:void <init>(com.mageventory.activity.AbsProductActivity,int) -> <init>
+    767:769:void run() -> run
 com.mageventory.activity.AbsProductActivity$7 -> com.mageventory.activity.r:
     java.lang.Runnable val$codeScannedRunnable -> a
-    825:825:void <init>(java.lang.Runnable) -> <init>
-    828:829:void onClick(android.content.DialogInterface,int) -> onClick
+    826:826:void <init>(java.lang.Runnable) -> <init>
+    829:830:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$8 -> com.mageventory.activity.s:
     java.lang.Runnable val$rescanRunnable -> a
-    833:833:void <init>(java.lang.Runnable) -> <init>
-    837:838:void onClick(android.content.DialogInterface,int) -> onClick
+    834:834:void <init>(java.lang.Runnable) -> <init>
+    838:839:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$9 -> com.mageventory.activity.t:
     java.lang.Runnable val$codeScannedRunnable -> a
     com.mageventory.settings.Settings val$settings -> b
-    842:842:void <init>(java.lang.Runnable,com.mageventory.settings.Settings) -> <init>
-    845:848:void onClick(android.content.DialogInterface,int) -> onClick
+    843:843:void <init>(java.lang.Runnable,com.mageventory.settings.Settings) -> <init>
+    846:849:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.AbsProductActivity$AttributeSetListAdapter -> com.mageventory.activity.u:
     java.util.List mAtrSets -> a
     android.view.LayoutInflater mLayoutInflater -> b
     android.content.res.ColorStateList mDefaultTextColor -> c
-    2639:2642:void <init>(java.util.List,android.view.LayoutInflater) -> <init>
-    2646:2646:int getCount() -> getCount
-    2651:2651:java.util.Map getItem(int) -> a
-    2656:2656:long getItemId(int) -> getItemId
-    2662:2688:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    2621:2621:java.lang.Object getItem(int) -> getItem
+    2640:2643:void <init>(java.util.List,android.view.LayoutInflater) -> <init>
+    2647:2647:int getCount() -> getCount
+    2652:2652:java.util.Map getItem(int) -> a
+    2657:2657:long getItemId(int) -> getItemId
+    2663:2689:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    2622:2622:java.lang.Object getItem(int) -> getItem
 com.mageventory.activity.AbsProductActivity$AttributeSetListAdapter$ViewHolder -> com.mageventory.activity.v:
     android.widget.TextView textView -> a
-    2694:2694:void <init>() -> <init>
+    2695:2695:void <init>() -> <init>
 com.mageventory.activity.AbsProductActivity$BookInfoLoadingControl -> com.mageventory.activity.w:
     boolean mIsLoading -> a
     android.widget.TextView mHintView -> b
     com.mageventory.util.LoadingControl mLinkedLoadingControl -> c
     boolean mShowNoBookFoundHint -> d
     com.mageventory.activity.AbsProductActivity this$0 -> e
-    3029:3058:void <init>(com.mageventory.activity.AbsProductActivity,android.widget.TextView,com.mageventory.util.LoadingControl,boolean) -> <init>
-    3062:3071:void startLoading() -> a
-    3076:3096:void stopLoading() -> b
-    3100:3100:boolean isLoading() -> c
+    3030:3059:void <init>(com.mageventory.activity.AbsProductActivity,android.widget.TextView,com.mageventory.util.LoadingControl,boolean) -> <init>
+    3063:3072:void startLoading() -> a
+    3077:3097:void stopLoading() -> b
+    3101:3101:boolean isLoading() -> c
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler -> com.mageventory.activity.x:
     java.util.Map MENU_ID_INPU_METHOD_MAP -> a
     com.mageventory.model.CustomAttribute mCustomAttribute -> b
     com.mageventory.activity.AbsProductActivity mActivity -> c
     boolean mAlternateKeyboardInputActivated -> d
     java.lang.Runnable mCopyFromAnotherProductHandler -> e
-    3643:3718:void <init>(com.mageventory.model.CustomAttribute,java.lang.Runnable,com.mageventory.activity.AbsProductActivity) -> <init>
-    3727:3754:android.graphics.Bitmap getBitmapForInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> a
-    3760:3763:void onClick(android.view.View) -> onClick
-    3767:3871:boolean onLongClick(android.view.View) -> onLongClick
-    3880:3911:void handleInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> b
-    3917:3918:void searchInternet() -> a
-    3925:3926:void copyFromAnotherProduct() -> b
-    3932:3940:void scanFreeText() -> c
-    3946:3955:void gestureInput() -> d
-    3961:3962:void normalKeyboard() -> e
-    3968:3969:void numericKeyboard() -> f
-    3977:3992:void setKeyboardInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> c
-    4004:4014:boolean adjustFocusableIfNecessary(boolean) -> a
-    3596:3609:void <clinit>() -> <clinit>
+    3644:3719:void <init>(com.mageventory.model.CustomAttribute,java.lang.Runnable,com.mageventory.activity.AbsProductActivity) -> <init>
+    3728:3755:android.graphics.Bitmap getBitmapForInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> a
+    3761:3764:void onClick(android.view.View) -> onClick
+    3768:3872:boolean onLongClick(android.view.View) -> onLongClick
+    3881:3912:void handleInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> b
+    3918:3919:void searchInternet() -> a
+    3926:3927:void copyFromAnotherProduct() -> b
+    3933:3941:void scanFreeText() -> c
+    3947:3956:void gestureInput() -> d
+    3962:3963:void normalKeyboard() -> e
+    3969:3970:void numericKeyboard() -> f
+    3978:3993:void setKeyboardInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> c
+    4005:4015:boolean adjustFocusableIfNecessary(boolean) -> a
+    3597:3610:void <clinit>() -> <clinit>
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$1 -> com.mageventory.activity.y:
     android.widget.EditText val$editText -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler this$0 -> b
-    3676:3676:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.content.res.Resources,android.graphics.Bitmap,byte[],android.graphics.Rect,java.lang.String,android.widget.EditText) -> <init>
-    3681:3682:int getIntrinsicWidth() -> getIntrinsicWidth
+    3677:3677:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.content.res.Resources,android.graphics.Bitmap,byte[],android.graphics.Rect,java.lang.String,android.widget.EditText) -> <init>
+    3682:3683:int getIntrinsicWidth() -> getIntrinsicWidth
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2 -> com.mageventory.activity.z:
     int mWidth -> a
     android.widget.EditText val$editText -> b
     android.graphics.drawable.NinePatchDrawable val$drawable -> c
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler this$0 -> d
-    3691:3695:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.widget.EditText,android.graphics.drawable.NinePatchDrawable) -> <init>
-    3701:3714:void onLayoutChange(android.view.View,int,int,int,int,int,int,int,int) -> onLayoutChange
+    3692:3696:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.widget.EditText,android.graphics.drawable.NinePatchDrawable) -> <init>
+    3702:3715:void onLayoutChange(android.view.View,int,int,int,int,int,int,int,int) -> onLayoutChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2$1 -> com.mageventory.activity.aa:
     int val$width -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2 this$1 -> b
-    3702:3702:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2,int) -> <init>
-    3706:3712:void run() -> run
+    3703:3703:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2,int) -> <init>
+    3707:3713:void run() -> run
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$3 -> com.mageventory.activity.ab:
     android.view.View val$v -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler this$0 -> b
-    3827:3827:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.view.View) -> <init>
-    3831:3857:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
+    3828:3828:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.view.View) -> <init>
+    3832:3858:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
 com.mageventory.activity.AbsProductActivity$CustomAttributeValueHolder -> com.mageventory.activity.ac:
     com.mageventory.model.CustomAttribute$CustomAttributeOption option -> a
     com.mageventory.model.CustomAttribute customAttribute -> b
-    2814:2817:void <init>(com.mageventory.model.CustomAttribute$CustomAttributeOption,com.mageventory.model.CustomAttribute) -> <init>
+    2815:2818:void <init>(com.mageventory.model.CustomAttribute$CustomAttributeOption,com.mageventory.model.CustomAttribute) -> <init>
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer -> com.mageventory.activity.ad:
     java.lang.Runnable mCopyFromAnotherProductHandler -> a
     com.mageventory.activity.AbsProductActivity this$0 -> b
-    3192:3198:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    3230:3279:void processCustomAttribute(com.mageventory.model.CustomAttribute) -> a
-    3287:3342:void processNameAttribute(com.mageventory.model.CustomAttribute) -> b
-    3352:3378:void processBarcodeAttribute(com.mageventory.model.CustomAttribute) -> c
-    3387:3421:void processSkuAttribute(com.mageventory.model.CustomAttribute) -> d
-    3430:3458:void processIssnAttribute(com.mageventory.model.CustomAttribute) -> e
-    3467:3503:void processIsbnAttribute(com.mageventory.model.CustomAttribute) -> f
+    3193:3199:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    3231:3280:void processCustomAttribute(com.mageventory.model.CustomAttribute) -> a
+    3288:3343:void processNameAttribute(com.mageventory.model.CustomAttribute) -> b
+    3353:3379:void processBarcodeAttribute(com.mageventory.model.CustomAttribute) -> c
+    3388:3422:void processSkuAttribute(com.mageventory.model.CustomAttribute) -> d
+    3431:3459:void processIssnAttribute(com.mageventory.model.CustomAttribute) -> e
+    3468:3504:void processIsbnAttribute(com.mageventory.model.CustomAttribute) -> f
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$1 -> com.mageventory.activity.ae:
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> a
-    3198:3198:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer) -> <init>
-    3203:3226:void run() -> run
+    3199:3199:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer) -> <init>
+    3204:3227:void run() -> run
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$1$1 -> com.mageventory.activity.af:
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$1 this$2 -> a
-    3204:3204:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$1) -> <init>
-    3208:3219:void onProductSkuSelected(java.lang.String) -> a
+    3205:3205:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$1) -> <init>
+    3209:3220:void onProductSkuSelected(java.lang.String) -> a
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$2 -> com.mageventory.activity.ag:
     com.mageventory.model.CustomAttribute val$attribute -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler val$inputHandler -> b
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> c
-    3256:3256:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener,com.mageventory.model.CustomAttribute,com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler) -> <init>
-    3259:3273:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3257:3257:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener,com.mageventory.model.CustomAttribute,com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler) -> <init>
+    3260:3274:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$3 -> com.mageventory.activity.ah:
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> a
-    3291:3291:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
-    3295:3312:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3292:3292:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
+    3296:3313:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$4 -> com.mageventory.activity.ai:
     com.mageventory.model.CustomAttribute val$attribute -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> b
-    3314:3314:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,com.mageventory.model.CustomAttribute) -> <init>
-    3318:3318:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    3322:3322:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    3326:3340:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    3315:3315:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,com.mageventory.model.CustomAttribute) -> <init>
+    3319:3319:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    3323:3323:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    3327:3341:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$5 -> com.mageventory.activity.aj:
     java.lang.String mInitialValue -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> b
-    3354:3354:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
-    3363:3376:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3355:3355:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
+    3364:3377:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$6 -> com.mageventory.activity.ak:
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> a
-    3389:3389:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
-    3393:3419:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3390:3390:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
+    3394:3420:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$7 -> com.mageventory.activity.al:
     com.mageventory.model.CustomAttribute val$attribute -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> b
-    3432:3432:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener,com.mageventory.model.CustomAttribute) -> <init>
-    3436:3456:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3433:3433:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener,com.mageventory.model.CustomAttribute) -> <init>
+    3437:3457:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$8 -> com.mageventory.activity.am:
     com.mageventory.model.CustomAttribute val$attribute -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> b
-    3469:3469:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener,com.mageventory.model.CustomAttribute) -> <init>
-    3473:3501:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3470:3470:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener,com.mageventory.model.CustomAttribute) -> <init>
+    3474:3502:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer$FocusChangeListenerWrapper -> com.mageventory.activity.an:
     android.view.View$OnFocusChangeListener mOriginalListener -> d
     com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer this$1 -> e
-    3519:3521:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
-    3525:3528:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    3520:3522:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeViewAdditionalInitializer,android.view.View$OnFocusChangeListener) -> <init>
+    3526:3529:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.activity.AbsProductActivity$CustomOnAttributeValueChangedListener -> com.mageventory.activity.ao:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    3109:3109:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    3115:3184:void attributeValueChanged(java.lang.String,java.lang.String,com.mageventory.model.CustomAttribute) -> a
+    3110:3110:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    3116:3185:void attributeValueChanged(java.lang.String,java.lang.String,com.mageventory.model.CustomAttribute) -> a
 com.mageventory.activity.AbsProductActivity$LoadCategoriesTask -> com.mageventory.activity.ap:
     java.util.List mCategories -> b
     com.mageventory.activity.AbsProductActivity this$0 -> c
-    2894:2898:void <init>(com.mageventory.activity.AbsProductActivity,boolean) -> <init>
-    2902:2910:void onSuccessPostExecute() -> a
-    2914:2924:void onFailedPostExecute() -> b
-    2928:2930:boolean extraLoadAfterCategoriesDataIsLoaded() -> c
-    2939:2939:java.util.List getCategories() -> d
+    2895:2899:void <init>(com.mageventory.activity.AbsProductActivity,boolean) -> <init>
+    2903:2911:void onSuccessPostExecute() -> a
+    2915:2925:void onFailedPostExecute() -> b
+    2929:2931:boolean extraLoadAfterCategoriesDataIsLoaded() -> c
+    2940:2940:java.util.List getCategories() -> d
 com.mageventory.activity.AbsProductActivity$ProductAttributeValueLoaderTask -> com.mageventory.activity.aq:
     com.mageventory.model.CustomAttribute mCustomAttribute -> b
     com.mageventory.activity.AbsProductActivity this$0 -> c
-    2835:2839:void <init>(com.mageventory.activity.AbsProductActivity,java.lang.String,com.mageventory.model.CustomAttribute) -> <init>
-    2843:2853:void onFailedPostExecute() -> b
-    2857:2878:void onSuccessPostExecute() -> a
+    2836:2840:void <init>(com.mageventory.activity.AbsProductActivity,java.lang.String,com.mageventory.model.CustomAttribute) -> <init>
+    2844:2854:void onFailedPostExecute() -> b
+    2858:2879:void onSuccessPostExecute() -> a
 com.mageventory.activity.AbsProductActivity$ProductInfoLoader -> com.mageventory.activity.ar:
     java.lang.String sku -> b
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> c
     boolean mCheckBarcode -> d
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    2952:2955:void <init>(com.mageventory.activity.AbsProductActivity,java.lang.String,boolean) -> <init>
-    2959:2966:void onPreExecute() -> onPreExecute
-    2970:2986:java.lang.Boolean doInBackground(java.lang.String[]) -> a
-    2994:3000:void onPostExecute(java.lang.Boolean) -> a
-    2943:2943:void onPostExecute(java.lang.Object) -> onPostExecute
-    2943:2943:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    2953:2956:void <init>(com.mageventory.activity.AbsProductActivity,java.lang.String,boolean) -> <init>
+    2960:2967:void onPreExecute() -> onPreExecute
+    2971:2987:java.lang.Boolean doInBackground(java.lang.String[]) -> a
+    2995:3001:void onPostExecute(java.lang.Boolean) -> a
+    2944:2944:void onPostExecute(java.lang.Object) -> onPostExecute
+    2944:2944:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.activity.AbsProductActivity$ProductLookupPopupHandler -> com.mageventory.activity.as:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    2703:2705:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    2709:2709:java.util.Collection getCustomAttributes() -> a
-    2714:2721:void initExtraAttributes(java.util.List) -> a
-    2725:2733:java.lang.String getValue(com.mageventory.model.CustomAttribute) -> a
+    2704:2706:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    2710:2710:java.util.Collection getCustomAttributes() -> a
+    2715:2722:void initExtraAttributes(java.util.List) -> a
+    2726:2734:java.lang.String getValue(com.mageventory.model.CustomAttribute) -> a
 com.mageventory.activity.AbsProductActivity$RecentWebAddressesSearchPopupHandler -> com.mageventory.activity.at:
     com.mageventory.activity.AbsProductActivity this$0 -> a
-    2742:2744:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
-    2748:2748:java.util.List getCustomAttributes() -> b
-    2754:2761:void initExtraAttributes(java.util.ArrayList,java.util.ArrayList) -> a
-    2765:2771:void initExtraAttributes(java.util.List) -> a
-    2775:2783:java.lang.String getValue(com.mageventory.model.CustomAttribute) -> a
-    2789:2791:void initWebActivityIntent(android.content.Intent) -> a
-    2740:2740:java.util.Collection getCustomAttributes() -> a
+    2743:2745:void <init>(com.mageventory.activity.AbsProductActivity) -> <init>
+    2749:2749:java.util.List getCustomAttributes() -> b
+    2755:2762:void initExtraAttributes(java.util.ArrayList,java.util.ArrayList) -> a
+    2766:2772:void initExtraAttributes(java.util.List) -> a
+    2776:2784:java.lang.String getValue(com.mageventory.model.CustomAttribute) -> a
+    2790:2792:void initWebActivityIntent(android.content.Intent) -> a
+    2741:2741:java.util.Collection getCustomAttributes() -> a
 com.mageventory.activity.CameraTimeSyncActivity -> com.mageventory.activity.CameraTimeSyncActivity:
     java.lang.String TAG -> i
     35:35:void <init>() -> <init>
@@ -17996,7 +17996,7 @@ com.mageventory.activity.ProductDetailsActivity -> com.mageventory.activity.Prod
     com.mageventory.activity.ProductDetailsActivity$RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler -> O
     android.text.TextWatcher evaluteTotalTextWatcher -> aS
     android.text.TextWatcher evaluatePriceTextWatcher -> aT
-    137:3651:void <init>() -> <init>
+    137:3640:void <init>() -> <init>
     326:521:void onCreate(android.os.Bundle) -> onCreate
     524:580:void showSellNowDialog() -> g
     583:641:void showAddToCartDialog() -> h
@@ -18006,15 +18006,15 @@ com.mageventory.activity.ProductDetailsActivity -> com.mageventory.activity.Prod
     821:834:void showZeroQTYErrorDialog() -> k
     838:851:void showTimestampRecordingError(android.content.Context) -> a
     874:877:void onBackPressed() -> onBackPressed
-    881:916:void updateUIWithAddToCartJobs() -> v
+    881:916:void updateUIWithAddToCartJobs() -> u
     921:1059:void updateUIWithSellJobs(com.mageventory.model.Product) -> a
-    1067:1067:com.mageventory.job.JobCallback newAddToCartJobCallback() -> w
-    1120:1120:com.mageventory.job.JobCallback newSellJobCallback() -> x
-    1170:1170:com.mageventory.job.JobCallback newSubmitToTMCallback() -> y
-    1210:1226:void registerSellJobCallbacks() -> z
-    1230:1234:void unregisterSellJobCallbacks() -> A
-    1238:1254:void registerAddToCartJobCallbacks() -> B
-    1258:1262:void unregisterAddToCartJobCallbacks() -> C
+    1067:1067:com.mageventory.job.JobCallback newAddToCartJobCallback() -> v
+    1120:1120:com.mageventory.job.JobCallback newSellJobCallback() -> w
+    1170:1170:com.mageventory.job.JobCallback newSubmitToTMCallback() -> x
+    1210:1226:void registerSellJobCallbacks() -> y
+    1230:1234:void unregisterSellJobCallbacks() -> z
+    1238:1254:void registerAddToCartJobCallbacks() -> A
+    1258:1262:void unregisterAddToCartJobCallbacks() -> B
     1266:1287:void showSubmitToTMJobUIInfo(com.mageventory.job.Job) -> a
     1291:1323:void showProductCreationJobUIInfo(com.mageventory.job.Job) -> b
     1327:1342:void showProductEditJobUIInfo(com.mageventory.job.Job) -> c
@@ -18029,42 +18029,42 @@ com.mageventory.activity.ProductDetailsActivity -> com.mageventory.activity.Prod
     1724:1788:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
     1795:1812:void showProductWasDeletedMessageDialog() -> q
     1819:1854:void showProductWasDeletedQuestionDialog() -> r
-    1859:2382:void mapData(com.mageventory.model.Product,java.util.Map,java.util.Map,java.util.List) -> a
-    2388:2395:void launchCategoriesPicker() -> s
-    2398:2399:void loadDetails() -> D
-    2410:2429:void loadDetails(boolean,boolean,boolean) -> a
-    2432:2434:void showProgressDialog(java.lang.String) -> b
-    2438:2439:void addToCart() -> E
-    2445:2446:void createOrder() -> F
-    2449:2450:void dismissProgressDialog() -> G
-    2454:2458:void deleteProduct() -> H
-    2467:2471:boolean deleteProductAction() -> t
-    2480:2491:void reportMissingAttributeSetAction() -> u
-    2494:2509:void startCameraActivity() -> I
-    2512:2516:void startLibraryActivity() -> J
-    2530:2564:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    2635:2639:void addNewImage(java.lang.String) -> c
-    2645:2647:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    2651:2658:void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
-    2679:2704:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getImagePreviewLayoutData(java.lang.String,java.lang.String,int,java.lang.String,int,int) -> a
-    2709:2729:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getDownloadingImagePreviewLayoutData(java.lang.String,java.lang.String,int,java.lang.String,int,int) -> b
-    2733:2746:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getUploadingImagePreviewLayoutData(com.mageventory.job.Job,int,java.lang.String) -> a
-    2757:2762:void startPhotoViewActivity(java.lang.String) -> a
-    2768:2769:void scrollToBottom() -> K
-    2884:2927:void loadImages() -> L
-    3322:3324:void launchNewProdActivityInDuplicationMode(boolean,java.lang.String,float) -> a
-    3334:3351:void launchNewProdActivityInDuplicationMode(boolean,boolean,java.lang.String,float) -> a
-    3354:3362:void launchDetails(com.mageventory.model.Product$SiblingInfo) -> a
-    3366:3497:void showDuplicationDialog() -> M
-    3505:3593:android.app.Dialog onCreateDialog(int) -> onCreateDialog
-    3600:3606:void startEditActivity(boolean,boolean) -> a
-    3612:3630:boolean isVerifiedData() -> N
-    3671:3704:void evaluateTotalFunc() -> O
-    3708:3746:void evaluatePriceFunc() -> P
-    3750:3854:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-    3863:3867:void launchProductDetails(java.lang.String,android.content.Context) -> a
-    3871:3872:void onCategoriesSelected(java.util.Collection) -> c
-    3877:3877:void onCategoriesSelectionCancelled() -> R
+    1859:2368:void mapData(com.mageventory.model.Product,java.util.Map,java.util.Map,java.util.List) -> a
+    2376:2384:void launchCategoriesPicker(boolean) -> c
+    2387:2388:void loadDetails() -> C
+    2399:2418:void loadDetails(boolean,boolean,boolean) -> a
+    2421:2423:void showProgressDialog(java.lang.String) -> b
+    2427:2428:void addToCart() -> D
+    2434:2435:void createOrder() -> E
+    2438:2439:void dismissProgressDialog() -> F
+    2443:2447:void deleteProduct() -> G
+    2456:2460:boolean deleteProductAction() -> s
+    2469:2480:void reportMissingAttributeSetAction() -> t
+    2483:2498:void startCameraActivity() -> H
+    2501:2505:void startLibraryActivity() -> I
+    2519:2553:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    2624:2628:void addNewImage(java.lang.String) -> c
+    2634:2636:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
+    2640:2647:void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
+    2668:2693:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getImagePreviewLayoutData(java.lang.String,java.lang.String,int,java.lang.String,int,int) -> a
+    2698:2718:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getDownloadingImagePreviewLayoutData(java.lang.String,java.lang.String,int,java.lang.String,int,int) -> b
+    2722:2735:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getUploadingImagePreviewLayoutData(com.mageventory.job.Job,int,java.lang.String) -> a
+    2746:2751:void startPhotoViewActivity(java.lang.String) -> a
+    2757:2758:void scrollToBottom() -> J
+    2873:2916:void loadImages() -> K
+    3311:3313:void launchNewProdActivityInDuplicationMode(boolean,java.lang.String,float) -> a
+    3323:3340:void launchNewProdActivityInDuplicationMode(boolean,boolean,java.lang.String,float) -> a
+    3343:3351:void launchDetails(com.mageventory.model.Product$SiblingInfo) -> a
+    3355:3486:void showDuplicationDialog() -> L
+    3494:3582:android.app.Dialog onCreateDialog(int) -> onCreateDialog
+    3589:3595:void startEditActivity(boolean,boolean) -> a
+    3601:3619:boolean isVerifiedData() -> M
+    3660:3693:void evaluateTotalFunc() -> N
+    3697:3735:void evaluatePriceFunc() -> O
+    3739:3843:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
+    3852:3856:void launchProductDetails(java.lang.String,android.content.Context) -> a
+    3860:3861:void onCategoriesSelected(java.util.Collection) -> c
+    3866:3866:void onCategoriesSelectionCancelled() -> R
     137:137:void access$000(com.mageventory.activity.ProductDetailsActivity) -> a
     137:137:void access$100(com.mageventory.activity.ProductDetailsActivity) -> b
     137:137:java.lang.String access$200(com.mageventory.activity.ProductDetailsActivity) -> c
@@ -18285,104 +18285,108 @@ com.mageventory.activity.ProductDetailsActivity$31 -> com.mageventory.activity.k
     1843:1843:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
     1847:1851:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$32 -> com.mageventory.activity.ky:
-    com.mageventory.model.Product val$p -> a
-    java.util.Map val$categories -> b
+    java.util.Map val$categories -> a
+    com.mageventory.model.Product val$p -> b
     java.util.Map val$attributeSet -> c
     java.util.List val$attributeList -> d
     com.mageventory.activity.ProductDetailsActivity this$0 -> e
-    1866:1866:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.model.Product,java.util.Map,java.util.Map,java.util.List) -> <init>
-    1869:2203:void run() -> run
-    2216:2233:void setValueToTextView(java.lang.String,android.widget.TextView,com.mageventory.model.CustomAttribute) -> a
-    2237:2296:void processPriceStatus(com.mageventory.model.Product,boolean,boolean) -> a
-    2301:2374:android.view.View processSiblingsSection(com.mageventory.model.Product,java.util.List,com.mageventory.model.CustomAttribute) -> a
-com.mageventory.activity.ProductDetailsActivity$32$1 -> com.mageventory.activity.kz:
-    com.mageventory.activity.ProductDetailsActivity$32 this$1 -> a
-    1896:1896:void <init>(com.mageventory.activity.ProductDetailsActivity$32) -> <init>
-    1900:1901:void onClick(android.view.View) -> onClick
-com.mageventory.activity.ProductDetailsActivity$32$2 -> com.mageventory.activity.la:
+    1866:1866:void <init>(com.mageventory.activity.ProductDetailsActivity,java.util.Map,com.mageventory.model.Product,java.util.Map,java.util.List) -> <init>
+    1869:2189:void run() -> run
+    2202:2219:void setValueToTextView(java.lang.String,android.widget.TextView,com.mageventory.model.CustomAttribute) -> a
+    2223:2282:void processPriceStatus(com.mageventory.model.Product,boolean,boolean) -> a
+    2287:2360:android.view.View processSiblingsSection(com.mageventory.model.Product,java.util.List,com.mageventory.model.CustomAttribute) -> a
+    1895:1895:void lambda$run$0(boolean,android.view.View) -> a
+    void access$lambda$0(com.mageventory.activity.ProductDetailsActivity$32,boolean,android.view.View) -> a
+com.mageventory.activity.ProductDetailsActivity$32$$Lambda$1 -> com.mageventory.activity.kz:
+    com.mageventory.activity.ProductDetailsActivity$32 arg$1 -> a
+    boolean arg$2 -> b
+    void <init>(com.mageventory.activity.ProductDetailsActivity$32,boolean) -> <init>
+    void onClick(android.view.View) -> onClick
+    android.view.View$OnClickListener lambdaFactory$(com.mageventory.activity.ProductDetailsActivity$32,boolean) -> a
+com.mageventory.activity.ProductDetailsActivity$32$1 -> com.mageventory.activity.la:
     android.view.ViewGroup val$siblingsContainer -> a
     com.mageventory.activity.ProductDetailsActivity$32 this$1 -> b
-    2306:2306:void <init>(com.mageventory.activity.ProductDetailsActivity$32,android.view.ViewGroup) -> <init>
-    2310:2317:void onClick(android.view.View) -> onClick
-com.mageventory.activity.ProductDetailsActivity$32$3 -> com.mageventory.activity.lb:
+    2292:2292:void <init>(com.mageventory.activity.ProductDetailsActivity$32,android.view.ViewGroup) -> <init>
+    2296:2303:void onClick(android.view.View) -> onClick
+com.mageventory.activity.ProductDetailsActivity$32$2 -> com.mageventory.activity.lb:
     com.mageventory.model.Product$SiblingInfo val$si -> a
     com.mageventory.activity.ProductDetailsActivity$32 this$1 -> b
-    2328:2328:void <init>(com.mageventory.activity.ProductDetailsActivity$32,com.mageventory.model.Product$SiblingInfo) -> <init>
-    2332:2333:void onClick(android.view.View) -> onClick
+    2314:2314:void <init>(com.mageventory.activity.ProductDetailsActivity$32,com.mageventory.model.Product$SiblingInfo) -> <init>
+    2318:2319:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ProductDetailsActivity$33 -> com.mageventory.activity.lc:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    2696:2696:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    2700:2701:void run() -> run
+    2685:2685:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    2689:2690:void run() -> run
 com.mageventory.activity.ProductDetailsActivity$34 -> com.mageventory.activity.ld:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    2722:2722:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    2726:2727:void run() -> run
+    2711:2711:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    2715:2716:void run() -> run
 com.mageventory.activity.ProductDetailsActivity$35 -> com.mageventory.activity.le:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    2739:2739:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    2743:2744:void run() -> run
+    2728:2728:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    2732:2733:void run() -> run
 com.mageventory.activity.ProductDetailsActivity$36 -> com.mageventory.activity.lf:
     android.widget.EditText val$decreaseQTYedit -> a
     com.mageventory.activity.ProductDetailsActivity this$0 -> b
-    3433:3433:void <init>(com.mageventory.activity.ProductDetailsActivity,android.widget.EditText) -> <init>
-    3437:3440:void onItemSelected(android.widget.AdapterView,android.view.View,int,long) -> onItemSelected
-    3444:3444:void onNothingSelected(android.widget.AdapterView) -> onNothingSelected
+    3422:3422:void <init>(com.mageventory.activity.ProductDetailsActivity,android.widget.EditText) -> <init>
+    3426:3429:void onItemSelected(android.widget.AdapterView,android.view.View,int,long) -> onItemSelected
+    3433:3433:void onNothingSelected(android.widget.AdapterView) -> onNothingSelected
 com.mageventory.activity.ProductDetailsActivity$37 -> com.mageventory.activity.lg:
     android.widget.EditText val$decreaseQTYedit -> a
     com.mageventory.activity.ProductDetailsActivity this$0 -> b
-    3447:3447:void <init>(com.mageventory.activity.ProductDetailsActivity,android.widget.EditText) -> <init>
-    3451:3454:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
+    3436:3436:void <init>(com.mageventory.activity.ProductDetailsActivity,android.widget.EditText) -> <init>
+    3440:3443:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
 com.mageventory.activity.ProductDetailsActivity$38 -> com.mageventory.activity.lh:
     android.widget.EditText val$decreaseQTYedit -> a
     android.widget.CheckBox val$editBeforeSavingCheckbox -> b
     java.lang.String[] val$copyPhotoModes -> c
     android.widget.Spinner val$copyPhotosSpinner -> d
     com.mageventory.activity.ProductDetailsActivity this$0 -> e
-    3462:3462:void <init>(com.mageventory.activity.ProductDetailsActivity,android.widget.EditText,android.widget.CheckBox,java.lang.String[],android.widget.Spinner) -> <init>
-    3465:3492:void onClick(android.content.DialogInterface,int) -> onClick
+    3451:3451:void <init>(com.mageventory.activity.ProductDetailsActivity,android.widget.EditText,android.widget.CheckBox,java.lang.String[],android.widget.Spinner) -> <init>
+    3454:3481:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$39 -> com.mageventory.activity.li:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3515:3515:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3519:3520:void onClick(android.content.DialogInterface,int) -> onClick
+    3504:3504:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3508:3509:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$4 -> com.mageventory.activity.lj:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
     535:535:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
     539:555:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$40 -> com.mageventory.activity.lk:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3524:3524:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3528:3528:void onClick(android.content.DialogInterface,int) -> onClick
+    3513:3513:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3517:3517:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$41 -> com.mageventory.activity.ll:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3540:3540:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3544:3545:void onClick(android.content.DialogInterface,int) -> onClick
+    3529:3529:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3533:3534:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$42 -> com.mageventory.activity.lm:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3550:3550:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3554:3555:void onDismiss(android.content.DialogInterface) -> onDismiss
+    3539:3539:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3543:3544:void onDismiss(android.content.DialogInterface) -> onDismiss
 com.mageventory.activity.ProductDetailsActivity$43 -> com.mageventory.activity.ln:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3570:3570:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3575:3576:void onClick(android.content.DialogInterface,int) -> onClick
+    3559:3559:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3564:3565:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$44 -> com.mageventory.activity.lo:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3581:3581:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3585:3586:void onClick(android.content.DialogInterface,int) -> onClick
+    3570:3570:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3574:3575:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$45 -> com.mageventory.activity.lp:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3633:3633:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3637:3640:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    3644:3644:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    3648:3648:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    3622:3622:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3626:3629:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    3633:3633:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    3637:3637:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.activity.ProductDetailsActivity$46 -> com.mageventory.activity.lq:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3651:3651:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3655:3658:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    3662:3662:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    3666:3666:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    3640:3640:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3644:3647:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    3651:3651:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    3655:3655:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.activity.ProductDetailsActivity$47 -> com.mageventory.activity.lr:
     int[] $SwitchMap$com$mageventory$util$EventBusUtils$EventType -> a
-    3750:3750:void <clinit>() -> <clinit>
+    3739:3739:void <clinit>() -> <clinit>
 com.mageventory.activity.ProductDetailsActivity$5 -> com.mageventory.activity.ls:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
     559:559:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
@@ -18407,87 +18411,87 @@ com.mageventory.activity.ProductDetailsActivity$AddNewImageTask -> com.magevento
     com.mageventory.job.Job mUploadImageJob -> b
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> c
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    2566:2566:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    2573:2578:void onPreExecute() -> onPreExecute
-    2582:2598:java.lang.Boolean doInBackground(java.lang.String[]) -> a
-    2603:2628:void onPostExecute(java.lang.Boolean) -> a
-    2566:2566:void onPostExecute(java.lang.Object) -> onPostExecute
-    2566:2566:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-    2566:2566:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
+    2555:2555:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    2562:2567:void onPreExecute() -> onPreExecute
+    2571:2587:java.lang.Boolean doInBackground(java.lang.String[]) -> a
+    2592:2617:void onPostExecute(java.lang.Boolean) -> a
+    2555:2555:void onPostExecute(java.lang.Object) -> onPostExecute
+    2555:2555:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    2555:2555:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
 com.mageventory.activity.ProductDetailsActivity$AddToCart -> com.mageventory.activity.ly:
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3199:3199:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3205:3208:void onPreExecute() -> onPreExecute
-    3213:3251:com.mageventory.job.Job doInBackground(java.lang.Integer[]) -> a
-    3256:3263:void onPostExecute(com.mageventory.job.Job) -> a
-    3199:3199:void onPostExecute(java.lang.Object) -> onPostExecute
-    3199:3199:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-    3199:3199:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
+    3188:3188:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3194:3197:void onPreExecute() -> onPreExecute
+    3202:3240:com.mageventory.job.Job doInBackground(java.lang.Integer[]) -> a
+    3245:3252:void onPostExecute(com.mageventory.job.Job) -> a
+    3188:3188:void onPostExecute(java.lang.Object) -> onPostExecute
+    3188:3188:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    3188:3188:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
 com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener -> com.mageventory.activity.lz:
     java.lang.ref.WeakReference activityReference -> a
     com.mageventory.activity.ProductDetailsActivity activityInstance -> b
-    3058:3061:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3066:3096:void onDelete(com.mageventory.components.ImagePreviewLayout) -> a
-    3101:3109:void onClickForEdit(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData) -> a
-    3114:3119:void onClickForMainImage(com.mageventory.components.ImagePreviewLayout) -> b
+    3047:3050:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3055:3085:void onDelete(com.mageventory.components.ImagePreviewLayout) -> a
+    3090:3098:void onClickForEdit(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData) -> a
+    3103:3108:void onClickForMainImage(com.mageventory.components.ImagePreviewLayout) -> b
 com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener$1 -> com.mageventory.activity.ma:
     com.mageventory.components.ImagePreviewLayout val$layoutToRemove -> a
     com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData val$data -> b
     com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener this$0 -> c
-    3080:3080:void <init>(com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener,com.mageventory.components.ImagePreviewLayout,com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData) -> <init>
-    3084:3091:void onClick(android.content.DialogInterface,int) -> onClick
+    3069:3069:void <init>(com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener,com.mageventory.components.ImagePreviewLayout,com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData) -> <init>
+    3073:3080:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener$2 -> com.mageventory.activity.mb:
     com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData val$data -> a
     com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener this$0 -> b
-    3101:3101:void <init>(com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener,com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData) -> <init>
-    3105:3107:void run() -> run
+    3090:3090:void <init>(com.mageventory.activity.ProductDetailsActivity$ClickManageImageListener,com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData) -> <init>
+    3094:3096:void run() -> run
 com.mageventory.activity.ProductDetailsActivity$CreateOrder -> com.mageventory.activity.mc:
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3269:3269:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3275:3278:void onPreExecute() -> onPreExecute
-    3284:3305:com.mageventory.job.Job doInBackground(java.lang.Integer[]) -> a
-    3310:3317:void onPostExecute(com.mageventory.job.Job) -> a
-    3269:3269:void onPostExecute(java.lang.Object) -> onPostExecute
-    3269:3269:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-    3269:3269:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
+    3258:3258:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3264:3267:void onPreExecute() -> onPreExecute
+    3273:3294:com.mageventory.job.Job doInBackground(java.lang.Integer[]) -> a
+    3299:3306:void onPostExecute(com.mageventory.job.Job) -> a
+    3258:3258:void onPostExecute(java.lang.Object) -> onPostExecute
+    3258:3258:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    3258:3258:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
 com.mageventory.activity.ProductDetailsActivity$DeleteImageAsyncTask -> com.mageventory.activity.md:
     com.mageventory.activity.ProductDetailsActivity mActivityInstance -> b
     com.mageventory.model.Product mProduct -> d
     com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mLayoutDataToRemove -> c
-    2990:2994:void <init>(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData,com.mageventory.activity.ProductDetailsActivity) -> <init>
-    2999:3008:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    3013:3014:int requestLoadResource() -> f
-    3020:3022:void onFailedPostExecute() -> b
-    3026:3041:void onSuccessPostExecute() -> a
-    2968:2968:java.lang.Object doInBackground(java.lang.Object[]) -> a
+    2979:2983:void <init>(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData,com.mageventory.activity.ProductDetailsActivity) -> <init>
+    2988:2997:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    3002:3003:int requestLoadResource() -> f
+    3009:3011:void onFailedPostExecute() -> b
+    3015:3030:void onSuccessPostExecute() -> a
+    2957:2957:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.ProductDetailsActivity$DeleteProduct -> com.mageventory.activity.me:
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3919:3919:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3925:3927:void onPreExecute() -> onPreExecute
-    3933:3941:java.lang.String doInBackground(java.lang.Integer[]) -> a
-    3919:3919:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-    3919:3919:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
+    3908:3908:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3914:3916:void onPreExecute() -> onPreExecute
+    3922:3930:java.lang.String doInBackground(java.lang.Integer[]) -> a
+    3908:3908:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    3908:3908:void <init>(com.mageventory.activity.ProductDetailsActivity,com.mageventory.activity.ProductDetailsActivity$1) -> <init>
 com.mageventory.activity.ProductDetailsActivity$DeleteUploadJobAsyncTask -> com.mageventory.activity.mf:
     com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mLayoutDataToRemove -> a
     com.mageventory.activity.ProductDetailsActivity mActivityInstance -> b
-    2935:2938:void <init>(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData,com.mageventory.activity.ProductDetailsActivity) -> <init>
-    2942:2946:void onSuccessPostExecute() -> a
-    2953:2964:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    2929:2929:java.lang.Object doInBackground(java.lang.Object[]) -> a
+    2924:2927:void <init>(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData,com.mageventory.activity.ProductDetailsActivity) -> <init>
+    2931:2935:void onSuccessPostExecute() -> a
+    2942:2953:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    2918:2918:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.ProductDetailsActivity$ProductDetailsAdapter -> com.mageventory.activity.mg:
     java.util.List mImagesData -> a
     com.mageventory.activity.ProductDetailsActivity this$0 -> b
-    3987:3991:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3995:3995:int getCount() -> getCount
-    4000:4005:java.lang.Object getItem(int) -> getItem
-    4010:4010:long getItemId(int) -> getItemId
-    4015:4020:int getItemViewType(int) -> getItemViewType
-    4025:4025:int getViewTypeCount() -> getViewTypeCount
-    4030:4040:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    4044:4044:java.util.List getImagesData() -> a
+    3976:3980:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3984:3984:int getCount() -> getCount
+    3989:3994:java.lang.Object getItem(int) -> getItem
+    3999:3999:long getItemId(int) -> getItemId
+    4004:4009:int getItemViewType(int) -> getItemViewType
+    4014:4014:int getViewTypeCount() -> getViewTypeCount
+    4019:4029:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    4033:4033:java.util.List getImagesData() -> a
 com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay -> com.mageventory.activity.mh:
     com.mageventory.model.Product mProduct -> b
     java.util.Map mCategories -> c
@@ -18498,33 +18502,33 @@ com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay -> com.mageve
     boolean forceAttributes -> h
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> i
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    2795:2801:void <init>(com.mageventory.activity.ProductDetailsActivity,boolean,boolean,boolean,com.mageventory.model.Product) -> <init>
-    2805:2808:void onPreExecute() -> onPreExecute
-    2812:2858:java.lang.Boolean doInBackground(java.lang.Object[]) -> a
-    2864:2880:void onPostExecute(java.lang.Boolean) -> a
-    2779:2779:void onPostExecute(java.lang.Object) -> onPostExecute
-    2779:2779:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-    2779:2779:boolean access$2600(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> a
-    2779:2779:boolean access$2700(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> b
-    2779:2779:boolean access$2800(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> c
-    2779:2779:com.mageventory.model.Product access$5100(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> d
+    2784:2790:void <init>(com.mageventory.activity.ProductDetailsActivity,boolean,boolean,boolean,com.mageventory.model.Product) -> <init>
+    2794:2797:void onPreExecute() -> onPreExecute
+    2801:2847:java.lang.Boolean doInBackground(java.lang.Object[]) -> a
+    2853:2869:void onPostExecute(java.lang.Boolean) -> a
+    2768:2768:void onPostExecute(java.lang.Object) -> onPostExecute
+    2768:2768:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    2768:2768:boolean access$2600(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> a
+    2768:2768:boolean access$2700(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> b
+    2768:2768:boolean access$2800(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> c
+    2768:2768:com.mageventory.model.Product access$5100(com.mageventory.activity.ProductDetailsActivity$ProductInfoDisplay) -> d
 com.mageventory.activity.ProductDetailsActivity$ProductLookupPopupHandler -> com.mageventory.activity.mi:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3884:3886:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3890:3890:java.util.Collection getCustomAttributes() -> a
+    3873:3875:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3879:3879:java.util.Collection getCustomAttributes() -> a
 com.mageventory.activity.ProductDetailsActivity$RecentWebAddressesSearchPopupHandler -> com.mageventory.activity.mj:
     com.mageventory.activity.ProductDetailsActivity this$0 -> a
-    3898:3900:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3904:3904:java.util.Collection getCustomAttributes() -> a
-    3909:3911:void initWebActivityIntent(android.content.Intent) -> a
+    3887:3889:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3893:3893:java.util.Collection getCustomAttributes() -> a
+    3898:3900:void initWebActivityIntent(android.content.Intent) -> a
 com.mageventory.activity.ProductDetailsActivity$RemoveCachedProductDetailsTask -> com.mageventory.activity.mk:
     java.lang.String mSku -> a
     java.lang.String mUrl -> b
     com.mageventory.activity.ProductDetailsActivity this$0 -> c
-    3953:3959:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
-    3966:3972:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    3977:3984:void onSuccessPostExecute() -> a
-    3949:3949:java.lang.Object doInBackground(java.lang.Object[]) -> a
+    3942:3948:void <init>(com.mageventory.activity.ProductDetailsActivity) -> <init>
+    3955:3961:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    3966:3973:void onSuccessPostExecute() -> a
+    3938:3938:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.ProductDetailsActivity$SubmitToTMTask -> com.mageventory.activity.ml:
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
     int categoryID -> a
@@ -18534,16 +18538,16 @@ com.mageventory.activity.ProductDetailsActivity$SubmitToTMTask -> com.mageventor
     int relist -> e
     java.lang.String accountID -> f
     com.mageventory.activity.ProductDetailsActivity this$0 -> g
-    3131:3133:void <init>(com.mageventory.activity.ProductDetailsActivity,int) -> <init>
-    3137:3152:void onPreExecute() -> onPreExecute
-    3156:3174:com.mageventory.job.Job doInBackground(java.lang.Integer[]) -> a
-    3180:3193:void onPostExecute(com.mageventory.job.Job) -> a
-    3123:3123:void onPostExecute(java.lang.Object) -> onPostExecute
-    3123:3123:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    3120:3122:void <init>(com.mageventory.activity.ProductDetailsActivity,int) -> <init>
+    3126:3141:void onPreExecute() -> onPreExecute
+    3145:3163:com.mageventory.job.Job doInBackground(java.lang.Integer[]) -> a
+    3169:3182:void onPostExecute(com.mageventory.job.Job) -> a
+    3112:3112:void onPostExecute(java.lang.Object) -> onPostExecute
+    3112:3112:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.activity.ProductDetailsActivity$UpdateProductCategoriesTask -> com.mageventory.activity.mm:
     com.mageventory.activity.ProductDetailsActivity this$0 -> b
-    4054:4059:void <init>(com.mageventory.activity.ProductDetailsActivity,java.util.Collection) -> <init>
-    4062:4071:void onSuccessPostExecute() -> a
+    4043:4048:void <init>(com.mageventory.activity.ProductDetailsActivity,java.util.Collection) -> <init>
+    4051:4060:void onSuccessPostExecute() -> a
 com.mageventory.activity.ProductEditActivity -> com.mageventory.activity.ProductEditActivity:
     java.util.concurrent.atomic.AtomicInteger attributeLoadCount -> T
     java.util.ArrayList mAdditionalSKUs -> U
@@ -20194,8 +20198,7 @@ com.mageventory.components.LinkTextView -> com.mageventory.components.LinkTextVi
     android.view.View$OnClickListener mOnClickListener -> e
     boolean mLongClickOccured -> f
     int mDefaultTextColor -> g
-    52:103:void init() -> d
-    111:114:void actAsPlainTextView() -> a
+    52:103:void init() -> c
     117:120:void <init>(android.content.Context) -> <init>
     123:126:void <init>(android.content.Context,android.util.AttributeSet) -> <init>
     130:133:void <init>(android.content.Context,android.util.AttributeSet,int) -> <init>
@@ -20203,8 +20206,8 @@ com.mageventory.components.LinkTextView -> com.mageventory.components.LinkTextVi
     143:145:void setTextAndURL(java.lang.String,java.lang.String) -> a
     149:151:void setTextAndOnClickListener(java.lang.String,android.view.View$OnClickListener) -> a
     28:28:boolean access$002(com.mageventory.components.LinkTextView,boolean) -> a
-    28:28:int access$100() -> b
-    28:28:int access$200() -> c
+    28:28:int access$100() -> a
+    28:28:int access$200() -> b
     28:28:boolean access$000(com.mageventory.components.LinkTextView) -> a
     28:28:java.lang.String access$300(com.mageventory.components.LinkTextView) -> b
     28:28:android.content.Context access$400(com.mageventory.components.LinkTextView) -> c
@@ -20507,63 +20510,66 @@ com.mageventory.fragment.CategoriesPickerFragment -> com.mageventory.fragment.Ca
     android.view.View mNoCategoriesIndicator -> am
     com.mageventory.fragment.CategoriesPickerFragment$CategoriesSelectionListener mCategoriesSelectionListener -> an
     44:44:void <init>() -> <init>
-    85:99:void onCreate(android.os.Bundle) -> a
-    103:105:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    111:159:void onViewCreated(android.view.View,android.os.Bundle) -> a
-    168:179:void displayData(java.util.List) -> a
-    185:186:void emptyList() -> U
-    194:196:void emptyList(boolean) -> e
-    202:203:void loadCategoriesList() -> V
-    211:234:void loadCategoriesList(boolean) -> d
-    241:269:void showLoadFailureDialog() -> S
-    279:281:void onLoadFailureDialogCancel() -> T
-    284:287:void onCancel(android.content.DialogInterface) -> onCancel
-    292:296:void onSaveInstanceState(android.os.Bundle) -> e
-    304:305:void setListAdapter(android.widget.ListAdapter) -> a
-    309:320:android.app.Dialog onCreateDialog(android.os.Bundle) -> c
+    89:102:void onCreate(android.os.Bundle) -> a
+    106:108:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    114:160:void onViewCreated(android.view.View,android.os.Bundle) -> a
+    169:180:void displayData(java.util.List) -> a
+    186:187:void emptyList() -> U
+    195:197:void emptyList(boolean) -> e
+    203:204:void loadCategoriesList() -> V
+    212:235:void loadCategoriesList(boolean) -> d
+    242:270:void showLoadFailureDialog() -> S
+    280:282:void onLoadFailureDialogCancel() -> T
+    286:289:void onCancel(android.content.DialogInterface) -> onCancel
+    294:298:void onSaveInstanceState(android.os.Bundle) -> e
+    306:307:void setListAdapter(android.widget.ListAdapter) -> a
+    311:322:android.app.Dialog onCreateDialog(android.os.Bundle) -> c
+    147:150:void lambda$onViewCreated$0(android.view.View) -> c
     44:44:void access$000(com.mageventory.fragment.CategoriesPickerFragment) -> a
     44:44:void access$100(com.mageventory.fragment.CategoriesPickerFragment) -> b
-    44:44:void access$200(com.mageventory.fragment.CategoriesPickerFragment) -> c
     48:48:void <clinit>() -> <clinit>
-com.mageventory.fragment.CategoriesPickerFragment$1 -> com.mageventory.fragment.w:
+    void access$lambda$0(com.mageventory.fragment.CategoriesPickerFragment,android.view.View) -> a
+com.mageventory.fragment.CategoriesPickerFragment$$Lambda$1 -> com.mageventory.fragment.w:
+    com.mageventory.fragment.CategoriesPickerFragment arg$1 -> a
+    void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
+    void onClick(android.view.View) -> onClick
+    android.view.View$OnClickListener lambdaFactory$(com.mageventory.fragment.CategoriesPickerFragment) -> a
+com.mageventory.fragment.CategoriesPickerFragment$1 -> com.mageventory.fragment.x:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    114:114:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
-    118:119:void onRefresh() -> a
-com.mageventory.fragment.CategoriesPickerFragment$2 -> com.mageventory.fragment.x:
+    117:117:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
+    121:122:void onRefresh() -> a
+com.mageventory.fragment.CategoriesPickerFragment$2 -> com.mageventory.fragment.y:
     android.support.v4.widget.SwipeRefreshLayout val$refreshController -> a
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> b
-    123:123:void <init>(com.mageventory.fragment.CategoriesPickerFragment,android.view.View,android.support.v4.widget.SwipeRefreshLayout) -> <init>
-    126:131:void setViewVisibile(boolean) -> a
-com.mageventory.fragment.CategoriesPickerFragment$3 -> com.mageventory.fragment.y:
+    126:126:void <init>(com.mageventory.fragment.CategoriesPickerFragment,android.view.View,android.support.v4.widget.SwipeRefreshLayout) -> <init>
+    129:134:void setViewVisibile(boolean) -> a
+com.mageventory.fragment.CategoriesPickerFragment$3 -> com.mageventory.fragment.z:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    142:142:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
-    146:149:void onClick(android.view.View) -> onClick
-com.mageventory.fragment.CategoriesPickerFragment$4 -> com.mageventory.fragment.z:
+    152:152:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
+    156:157:void onClick(android.view.View) -> onClick
+com.mageventory.fragment.CategoriesPickerFragment$4 -> com.mageventory.fragment.aa:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    151:151:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
-    155:156:void onClick(android.view.View) -> onClick
-com.mageventory.fragment.CategoriesPickerFragment$5 -> com.mageventory.fragment.aa:
+    255:255:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
+    258:259:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.fragment.CategoriesPickerFragment$5 -> com.mageventory.fragment.ab:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    254:254:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
-    257:258:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.fragment.CategoriesPickerFragment$6 -> com.mageventory.fragment.ab:
-    com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    261:261:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
-    264:265:void onClick(android.content.DialogInterface,int) -> onClick
+    262:262:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
+    265:266:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter -> com.mageventory.fragment.ac:
     java.util.List mCategories -> a
     java.util.Set mSelectedCategoryIds -> b
-    android.view.LayoutInflater mInflater -> c
-    com.mageventory.settings.SettingsSnapshot mSettings -> d
-    int mIndentation -> e
-    int mSelectedCategoryBackground -> f
-    com.mageventory.fragment.CategoriesPickerFragment this$0 -> g
-    378:413:void <init>(com.mageventory.fragment.CategoriesPickerFragment,java.util.List,java.util.Collection) -> <init>
-    417:417:int getCount() -> getCount
-    422:422:com.mageventory.model.Category getItem(int) -> a
-    427:427:long getItemId(int) -> getItemId
-    434:443:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    370:370:java.lang.Object getItem(int) -> getItem
+    boolean mReadOnly -> c
+    android.view.LayoutInflater mInflater -> d
+    com.mageventory.settings.SettingsSnapshot mSettings -> e
+    int mIndentation -> f
+    int mSelectedCategoryBackground -> g
+    com.mageventory.fragment.CategoriesPickerFragment this$0 -> h
+    380:422:void <init>(com.mageventory.fragment.CategoriesPickerFragment,java.util.List,java.util.Collection,boolean) -> <init>
+    426:426:int getCount() -> getCount
+    431:431:com.mageventory.model.Category getItem(int) -> a
+    436:436:long getItemId(int) -> getItemId
+    443:452:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    372:372:java.lang.Object getItem(int) -> getItem
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder -> com.mageventory.fragment.ad:
     android.widget.TextView mTextView -> a
     android.widget.CheckBox mCheckBox -> b
@@ -20571,29 +20577,31 @@ com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHold
     android.view.View mSelectedIndicator -> d
     com.mageventory.model.Category category -> e
     com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter this$1 -> f
-    475:497:void <init>(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter,android.view.View) -> <init>
-    505:514:void setData(com.mageventory.model.Category) -> a
-    523:525:void updatedSelectedIndicator(boolean) -> a
-com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder$1 -> com.mageventory.fragment.ae:
-    com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter val$this$1 -> a
-    com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder this$2 -> b
-    480:480:void <init>(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder,com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter) -> <init>
-    484:495:void onClick(android.view.View) -> onClick
+    484:506:void <init>(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter,android.view.View) -> <init>
+    514:523:void setData(com.mageventory.model.Category) -> a
+    532:534:void updatedSelectedIndicator(boolean) -> a
+    493:504:void lambda$new$0(android.view.View) -> a
+    void access$lambda$0(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder,android.view.View) -> a
+com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder$$Lambda$1 -> com.mageventory.fragment.ae:
+    com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder arg$1 -> a
+    void <init>(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder) -> <init>
+    void onClick(android.view.View) -> onClick
+    android.view.View$OnClickListener lambdaFactory$(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder) -> a
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesSelectionListener -> com.mageventory.fragment.af:
     void onCategoriesSelected(java.util.Collection) -> c
     void onCategoriesSelectionCancelled() -> R
 com.mageventory.fragment.CategoriesPickerFragment$LoadCategoriesTask -> com.mageventory.fragment.ag:
     java.util.List mCategories -> b
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> c
-    546:548:void <init>(com.mageventory.fragment.CategoriesPickerFragment,boolean,com.mageventory.settings.SettingsSnapshot,com.mageventory.util.LoadingControl) -> <init>
-    552:559:void onSuccessPostExecute() -> a
-    563:572:void onFailedPostExecute() -> b
-    576:578:boolean extraLoadAfterCategoriesDataIsLoaded() -> c
+    555:557:void <init>(com.mageventory.fragment.CategoriesPickerFragment,boolean,com.mageventory.settings.SettingsSnapshot,com.mageventory.util.LoadingControl) -> <init>
+    561:568:void onSuccessPostExecute() -> a
+    572:581:void onFailedPostExecute() -> b
+    585:587:boolean extraLoadAfterCategoriesDataIsLoaded() -> c
 com.mageventory.fragment.CategoriesPickerFragment$TargetFragmentCategoriesSelectionListener -> com.mageventory.fragment.ah:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    346:346:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
-    352:357:void onCategoriesSelected(java.util.Collection) -> c
-    361:363:void onCategoriesSelectionCancelled() -> R
+    348:348:void <init>(com.mageventory.fragment.CategoriesPickerFragment) -> <init>
+    354:359:void onCategoriesSelected(java.util.Collection) -> c
+    363:365:void onCategoriesSelectionCancelled() -> R
 com.mageventory.fragment.ManageDialogFragment -> com.mageventory.fragment.ManageDialogFragment:
     java.lang.String TAG -> aj
     android.widget.TextView mPhotoJobStatsText -> ak
@@ -21902,15 +21910,14 @@ com.mageventory.model.Product -> com.mageventory.model.v:
     617:617:java.lang.String[] getTMAccountLabels() -> B
     631:631:int getAttributeSetId() -> C
     640:640:boolean isAttributeSetChangingSupported() -> D
-    644:644:java.lang.String getMaincategory() -> E
-    653:653:java.lang.String getQuantity() -> F
+    653:653:java.lang.String getQuantity() -> E
     658:660:void setQuantity(java.lang.String) -> a
-    681:681:java.util.ArrayList getCategoryIds() -> G
+    681:681:java.util.ArrayList getCategoryIds() -> F
     686:703:int safeParseInt(java.util.Map,java.lang.String) -> a
     707:707:double safeParseDouble(java.util.Map,java.lang.String) -> b
     712:724:java.lang.Double safeParseDouble(java.util.Map,java.lang.String,java.lang.Double) -> a
     729:738:java.util.Date safeParseDate(java.util.Map,java.lang.String,java.util.Date) -> a
-    746:746:com.mageventory.model.Product getCopy() -> H
+    746:746:com.mageventory.model.Product getCopy() -> G
     796:796:java.lang.String getStringAttributeValue(java.lang.String) -> b
     809:816:java.lang.String getStringAttributeValue(java.lang.String,java.lang.String) -> a
     316:1085:void <init>(java.util.Map) -> <init>
@@ -24966,11 +24973,11 @@ com.mventory.R$styleable -> com.a.b:
     int ViewStubCompat_android_id -> ViewStubCompat_android_id
     int ViewStubCompat_android_inflatedId -> ViewStubCompat_android_inflatedId
     int ViewStubCompat_android_layout -> ViewStubCompat_android_layout
-    3905:8628:void <clinit>() -> <clinit>
+    3906:8629:void <clinit>() -> <clinit>
 com.reactor.gesture_input.CreateGestureActivity -> com.reactor.gesture_input.CreateGestureActivity:
     android.gesture.Gesture mGesture -> a
     android.view.View mDoneButton -> b
-    22:22:void <init>() -> <init>
+    22:69:void <init>() -> <init>
     30:40:void onCreate(android.os.Bundle) -> onCreate
     44:62:void addGesture(android.view.View) -> addGesture
     65:67:void cancelGesture(android.view.View) -> cancelGesture
@@ -24994,7 +25001,7 @@ com.reactor.gesture_input.GestureBuilderActivity -> com.reactor.gesture_input.Ge
     android.app.Dialog mRenameDialog -> e
     android.widget.EditText mInput -> f
     com.reactor.gesture_input.GestureUtils$NamedGesture mCurrentRenameGesture -> g
-    45:45:void <init>() -> <init>
+    45:403:void <init>() -> <init>
     67:80:void onCreate(android.os.Bundle) -> onCreate
     83:94:void copy(java.io.File,java.io.File) -> a
     98:132:void exportGestures(android.view.View) -> exportGestures
@@ -25052,7 +25059,7 @@ com.reactor.gesture_input.GestureInputActivity -> com.reactor.gesture_input.Gest
     boolean mSpeechInitialized -> d
     com.reactor.gesture_input.GestureInputActivity$GesturesLoadTask mTask -> e
     com.reactor.gesture_input.GestureInputActivity$GesturesAdapter mAdapter -> f
-    41:41:void <init>() -> <init>
+    41:300:void <init>() -> <init>
     63:137:void onCreate(android.os.Bundle) -> onCreate
     143:150:void reloadGesturesInformation() -> a
     154:160:void onBackPressed() -> onBackPressed

@@ -17,7 +17,7 @@ public class AttributeSetUtils implements MageventoryConstants {
      * selection operation is allowed or not
      */
     public static boolean isManualCategorySelectionAllowed(Map<String, Object> attributeSetData) {
-        return attributeSetData == null ? false : JobCacheManager.safeParseInt(attributeSetData.get(MAGEKEY_ATTRIBUTE_SET_HAS_MATCHING_RULES)) == 1;
+        return attributeSetData == null ? false : JobCacheManager.safeParseInt(attributeSetData.get(MAGEKEY_ATTRIBUTE_SET_HAS_MATCHING_RULES)) == 0;
     }
 
     /**

@@ -1,11 +1,5 @@
 package com.mageventory.fragment;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,9 +30,15 @@ import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.Util;
 import com.mventory.R;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * The categories selection dialog fragment
- * 
+ *
  * @author Eugene Popovich
  */
 public class CategoriesPickerFragment extends BaseDialogFragment {
@@ -50,6 +50,10 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
      * The key for the selected category IDs fragment argument
      */
     public static final String EXTRA_SELECTED_CATEGORY_IDS = "SELECTED_CATEGORIES";
+    /**
+     * The key for the read only fragment argument
+     */
+    public static final String READ_ONLY = "READ_ONLY";
     /**
      * The key for the dialog title fragment argument
      */
@@ -86,13 +90,12 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         if (getTargetFragment() == null) {
             // if target fragment is absent use activity as
             // CategoriesSelectionListener
-            if(!CategoriesSelectionListener.class.isInstance(getActivity()))
-            {
+            if (!CategoriesSelectionListener.class.isInstance(getActivity())) {
                 throw new IllegalStateException("The activity should implement CategoriesSelectionListener or use the target fragment");
-            }else{
+            } else {
                 mCategoriesSelectionListener = (CategoriesSelectionListener) getActivity();
             }
-        } else{
+        } else {
             // construct general listener for the target fragment
             mCategoriesSelectionListener = new TargetFragmentCategoriesSelectionListener();
         }
@@ -139,15 +142,13 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         } else if (getArguments() != null) {
             mSelectedCategoryIds = getArguments().getIntegerArrayList(EXTRA_SELECTED_CATEGORY_IDS);
         }
-        view.findViewById(R.id.saveBtn).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                CategoriesListAdapter adapter = (CategoriesListAdapter) mListView.getAdapter();
-                mCategoriesSelectionListener.onCategoriesSelected(adapter.mSelectedCategoryIds);
-                closeDialog();
-            }
+        View saveBtn = view.findViewById(R.id.saveBtn);
+        saveBtn.setOnClickListener(v -> {
+            CategoriesListAdapter adapter = (CategoriesListAdapter) mListView.getAdapter();
+            mCategoriesSelectionListener.onCategoriesSelected(adapter.mSelectedCategoryIds);
+            closeDialog();
         });
+        saveBtn.setVisibility(getArguments().getBoolean(READ_ONLY, false) ? View.GONE : View.VISIBLE);
         view.findViewById(R.id.cancelBtn).setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -160,7 +161,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
 
     /**
      * Display the categories list data
-     * 
+     *
      * @param data the loaded categories list data
      */
     public void displayData(List<Category> data) {
@@ -173,7 +174,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         } else {
             // hide empty categories list indicator
             mNoCategoriesIndicator.setVisibility(View.GONE);
-            adapter = new CategoriesListAdapter(data, mSelectedCategoryIds);
+            adapter = new CategoriesListAdapter(data, mSelectedCategoryIds, getArguments().getBoolean(READ_ONLY, false));
         }
         setListAdapter(adapter);
     }
@@ -187,7 +188,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
 
     /**
      * Remove all items from the categories list
-     * 
+     *
      * @param displayPlaceholder whether to display no categories indicator
      */
     private void emptyList(final boolean displayPlaceholder) {
@@ -204,13 +205,13 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
 
     /**
      * Load categories list asynchronously
-     * 
+     *
      * @param forceReload whether the cached data should be reloaded if exists
      */
     public void loadCategoriesList(final boolean forceReload) {
         CommonUtils.debug(TAG, false, "loadCategoriesList(" + forceReload
                 + ");");
-    
+
         if (mLoadCategoriesTask != null && !mLoadCategoriesTask.isFinished()) {
             // if there is an active load categories list task
             if (mLoadCategoriesTask.isForceReload() == forceReload) {
@@ -224,7 +225,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         // remember currently selected by user category IDs so selection will be
         // presetn after the list refresh
         CategoriesListAdapter adapter = (CategoriesListAdapter) mListView.getAdapter();
-        if(adapter != null){
+        if (adapter != null) {
             mSelectedCategoryIds = adapter.mSelectedCategoryIds;
         }
         emptyList();
@@ -279,6 +280,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         mCategoriesSelectionListener.onCategoriesSelectionCancelled();
         closeDialog();
     }
+
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
@@ -297,7 +299,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
 
     /**
      * Set the list adapter to the activity ListView
-     * 
+     *
      * @param adapter the adapter to set
      */
     protected void setListAdapter(ListAdapter adapter) {
@@ -327,7 +329,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
     public static interface CategoriesSelectionListener {
         /**
          * Fired when user selected categories and pressed save
-         * 
+         *
          * @param selectedCategoryIds the user selected categories ids
          */
         void onCategoriesSelected(Collection<Integer> selectedCategoryIds);
@@ -363,7 +365,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         }
 
     }
-    
+
     /**
      * The categories adapter to be used in the categories list
      */
@@ -376,6 +378,10 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
          * The selected category IDs
          */
         Set<Integer> mSelectedCategoryIds = new HashSet<Integer>();
+        /**
+         * Whether the adapter should be read only
+         */
+        boolean mReadOnly;
         /**
          * The layout inflater to use in the getView method
          */
@@ -391,16 +397,18 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         int mIndentation;
 
         /**
-         * The color to indicate selected categories 
+         * The color to indicate selected categories
          */
         int mSelectedCategoryBackground;
 
         /**
-         * @param categories The list of categories to display
+         * @param categories          The list of categories to display
          * @param selectedCategoryIds The selected category ids
+         * @param readOnly            Whether the adapter should be read only
          */
         CategoriesListAdapter(List<Category> categories,
-                Collection<Integer> selectedCategoryIds) {
+                              Collection<Integer> selectedCategoryIds,
+                              boolean readOnly) {
             mIndentation = getResources().getDimensionPixelSize(R.dimen.categories_indent);
             mSelectedCategoryBackground = CommonUtils
                     .getColorResource(R.color.category_selected_background);
@@ -408,6 +416,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
             if (selectedCategoryIds != null) {
                 mSelectedCategoryIds.addAll(selectedCategoryIds);
             }
+            mReadOnly = readOnly;
             mInflater = LayoutInflater.from(getActivity());
             mSettings = new SettingsSnapshot(getActivity().getApplicationContext());
         }
@@ -475,12 +484,12 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
             public ViewHolder(View view) {
                 mTextView = (TextView) view.findViewById(android.R.id.text1);
                 mCheckBox = (CheckBox) view.findViewById(android.R.id.checkbox);
+                mCheckBox.setEnabled(!mReadOnly);
                 mIndentationView = view.findViewById(R.id.indentation);
                 mSelectedIndicator = view.findViewById(R.id.selectedIndicator);
-                view.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
+                view.setClickable(!mReadOnly);
+                if (!mReadOnly) {
+                    view.setOnClickListener(v -> {
                         int categoryId = category.getId();
                         boolean selected;
                         if (mSelectedCategoryIds.contains(categoryId)) {
@@ -492,13 +501,13 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
                         }
                         mCheckBox.setChecked(selected);
                         updatedSelectedIndicator(selected);
-                    }
-                });
+                    });
+                }
             }
 
             /**
              * Set the data related to the view holder and update views
-             * 
+             *
              * @param category
              */
             void setData(final Category category) {
@@ -516,7 +525,7 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
             /**
              * Update category selected indicator background depend on selected
              * parameter
-             * 
+             *
              * @param selected whether the category is selected
              */
             public void updatedSelectedIndicator(boolean selected) {
@@ -537,13 +546,13 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         List<Category> mCategories;
 
         /**
-         * @param forceReload whether the cached data should be forced to reload
-         * @param settings the settings snapshot
+         * @param forceReload    whether the cached data should be forced to reload
+         * @param settings       the settings snapshot
          * @param loadingControl the loading control to be used to indicate task
-         *            activity
+         *                       activity
          */
         public LoadCategoriesTask(boolean forceReload, SettingsSnapshot settings,
-                LoadingControl loadingControl) {
+                                  LoadingControl loadingControl) {
             super(forceReload, settings, loadingControl);
         }
 

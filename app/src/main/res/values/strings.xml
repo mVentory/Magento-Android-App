@@ -216,6 +216,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="unable_to_load_image_preview">Unable to load the preview.</string>
     <string name="unable_to_load_all_images">Unable to load all the images.</string>
     <string name="menu_add_new_product_for_configurable_attribute">Add %1$s</string>
+    <string name="in_categories">In %1$d categories</string>
 
     <string-array name="share_items">
         <item>Facebook</item>

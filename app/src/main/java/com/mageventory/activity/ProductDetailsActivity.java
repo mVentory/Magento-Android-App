@@ -1868,45 +1868,31 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 long start = System.currentTimeMillis();
                 categoryView.setTextAndOnClickListener("", null);
-                int categoryId;
 
-                try {
-                    categoryId = Integer.parseInt(p.getMaincategory());
-                } catch (Throwable e) {
-                    categoryId = INVALID_CATEGORY_ID;
-                }
-
-                if (categories != null && !categories.isEmpty() && p.getMaincategory() != null) {
+                if (categories != null && !categories.isEmpty()) {
                     List<Category> list = Util.getCategorylist(categories, null);
+                    List<String> productCategories = p.getCategoryIds();
+                    int categoriesCount = productCategories == null ? 0 : productCategories.size();
 
                     if (list != null) {
                         boolean manualCategorySelectionAllowed = AttributeSetUtils.isManualCategorySelectionAllowed(attributeSet);
-                        String fullMainCategoryName = manualCategorySelectionAllowed ? getString(R.string.categories_select_action)
-                                : null;
-                        for (final Category cat : list) {
-                            if (cat.getId() == categoryId) {
-                                fullMainCategoryName = cat.getFullName();
-                                break;
+                        String categoryInfo = manualCategorySelectionAllowed ? getString(R.string.categories_select_action)
+                                : getString(R.string.in_categories, categoriesCount);
+                        if(categoriesCount == 1) {
+                            // if there is only one category selected
+                            int categoryId = JobCacheManager.safeParseInt(productCategories.get(0), INVALID_CATEGORY_ID);
+                            for (final Category cat : list) {
+                                if (cat.getId() == categoryId) {
+                                    categoryInfo = cat.getFullName();
+                                    break;
+                                }
                             }
+                        } else if(categoriesCount > 1){
+                            // if there are multiple categories selected
+                            categoryInfo = getString(R.string.in_categories, categoriesCount);
                         }
-                        if (manualCategorySelectionAllowed) {
-                            // if manual category selection functionality is
-                            // allowed
-                            categoryView.setTextAndOnClickListener(fullMainCategoryName,
-                                    new View.OnClickListener() {
-
-                                        @Override
-                                        public void onClick(View v) {
-                                            launchCategoriesPicker();
-                                        }
-
-                                    });
-                        } else {
-                            // set category as plain text and remove
-                            // linkification
-                            categoryView.setText(fullMainCategoryName);
-                            categoryView.actAsPlainTextView();
-                        }
+                        categoryView.setTextAndOnClickListener(categoryInfo,
+                                v -> launchCategoriesPicker(manualCategorySelectionAllowed));
                     }
                 }
 
@@ -2383,12 +2369,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     /**
      * Launch the categories picker fragment
+     *
+     * @param manualCategorySelectionAllowed whether the manual category selection is allowed
      */
-    public void launchCategoriesPicker() {
+    public void launchCategoriesPicker(boolean manualCategorySelectionAllowed) {
         CategoriesPickerFragment fragment = new CategoriesPickerFragment();
         Bundle args = new Bundle();
         args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS,
                 CategoryUtils.getAsIntegerArrayList(instance.getCategoryIds()));
+        args.putBoolean(CategoriesPickerFragment.READ_ONLY, !manualCategorySelectionAllowed);
         fragment.setArguments(args);
 
         fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
