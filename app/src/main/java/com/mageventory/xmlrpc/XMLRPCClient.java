@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -170,6 +171,8 @@ public class XMLRPCClient extends XMLRPCCommon {
         httpParams = postMethod.getParams();
         HttpProtocolParams.setUseExpectContinue(httpParams, false);
         mOkClient = new OkHttpClient();
+        mOkClient.setConnectTimeout(120, TimeUnit.SECONDS); // connect timeout
+        mOkClient.setReadTimeout(120, TimeUnit.SECONDS);    // socket timeout
         client = new OkApacheClient(mOkClient);
     }
 
