@@ -24575,14 +24575,14 @@ com.mageventory.xmlrpc.XMLRPCClient -> com.mageventory.i.c:
     boolean httpPreAuth -> h
     java.lang.String username -> i
     java.lang.String password -> j
-    149:174:void <init>(java.net.URI) -> <init>
-    213:214:void <init>(java.lang.String) -> <init>
-    389:437:java.lang.Object readServerResponse(java.io.InputStream) -> a
-    457:507:java.lang.Object callEx(java.lang.String,java.lang.Object[]) -> a
-    514:526:java.lang.String methodCall(java.lang.String,java.lang.Object[]) -> b
-    583:586:java.lang.Object call(java.lang.String,java.lang.Object,java.lang.Object) -> a
-    600:603:java.lang.Object call(java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object) -> a
-    139:139:void <clinit>() -> <clinit>
+    150:177:void <init>(java.net.URI) -> <init>
+    216:217:void <init>(java.lang.String) -> <init>
+    392:440:java.lang.Object readServerResponse(java.io.InputStream) -> a
+    460:510:java.lang.Object callEx(java.lang.String,java.lang.Object[]) -> a
+    517:529:java.lang.String methodCall(java.lang.String,java.lang.Object[]) -> b
+    586:589:java.lang.Object call(java.lang.String,java.lang.Object,java.lang.Object) -> a
+    603:606:java.lang.Object call(java.lang.String,java.lang.Object,java.lang.Object,java.lang.Object) -> a
+    140:140:void <clinit>() -> <clinit>
 com.mageventory.xmlrpc.XMLRPCCommon -> com.mageventory.i.d:
     org.xmlpull.v1.XmlSerializer serializer -> b
     com.mageventory.xmlrpc.IXMLRPCSerializer iXMLRPCSerializer -> c
@@ -24977,7 +24977,7 @@ com.mventory.R$styleable -> com.a.b:
 com.reactor.gesture_input.CreateGestureActivity -> com.reactor.gesture_input.CreateGestureActivity:
     android.gesture.Gesture mGesture -> a
     android.view.View mDoneButton -> b
-    22:69:void <init>() -> <init>
+    22:22:void <init>() -> <init>
     30:40:void onCreate(android.os.Bundle) -> onCreate
     44:62:void addGesture(android.view.View) -> addGesture
     65:67:void cancelGesture(android.view.View) -> cancelGesture
@@ -25001,7 +25001,7 @@ com.reactor.gesture_input.GestureBuilderActivity -> com.reactor.gesture_input.Ge
     android.app.Dialog mRenameDialog -> e
     android.widget.EditText mInput -> f
     com.reactor.gesture_input.GestureUtils$NamedGesture mCurrentRenameGesture -> g
-    45:403:void <init>() -> <init>
+    45:45:void <init>() -> <init>
     67:80:void onCreate(android.os.Bundle) -> onCreate
     83:94:void copy(java.io.File,java.io.File) -> a
     98:132:void exportGestures(android.view.View) -> exportGestures
@@ -25059,7 +25059,7 @@ com.reactor.gesture_input.GestureInputActivity -> com.reactor.gesture_input.Gest
     boolean mSpeechInitialized -> d
     com.reactor.gesture_input.GestureInputActivity$GesturesLoadTask mTask -> e
     com.reactor.gesture_input.GestureInputActivity$GesturesAdapter mAdapter -> f
-    41:300:void <init>() -> <init>
+    41:41:void <init>() -> <init>
     63:137:void onCreate(android.os.Bundle) -> onCreate
     143:150:void reloadGesturesInformation() -> a
     154:160:void onBackPressed() -> onBackPressed

@@ -519,7 +519,7 @@ public class CommonUtils {
     public static boolean isInternetEnabled() {
         boolean result = false;
         try {
-            Context context = MyApplication.getContext();
+            Context context = MyApplication.getContext().getApplicationContext();
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             result = wifiManager != null && wifiManager.isWifiEnabled();
             if (!result) {

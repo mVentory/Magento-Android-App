@@ -275,7 +275,7 @@ public class JobService extends Service implements ResourceConstants {
         /* Wake ourselves up every 10 seconds */
         mHandler.postDelayed(null, 10000);
 
-        WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "MyWifiLock");
 
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -427,7 +427,7 @@ public class JobService extends Service implements ResourceConstants {
         boolean networkStateOK = true;
         boolean avoidImageUploadJobs = false;
 
-        WifiManager wifimanager = (WifiManager) MyApplication.getContext().getSystemService(
+        WifiManager wifimanager = (WifiManager) MyApplication.getContext().getApplicationContext().getSystemService(
                 Context.WIFI_SERVICE);
         ConnectivityManager connManager = (ConnectivityManager) MyApplication.getContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
